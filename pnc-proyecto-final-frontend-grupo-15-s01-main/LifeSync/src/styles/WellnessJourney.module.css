@@ -1,0 +1,121 @@
+/* 1) Degradado full screen */
+.gradientWrapper {
+  position: relative;
+  width: 100%;
+  height: 100vh; /* ocupa toda la ventana */
+  background: linear-gradient(90deg, #ecfdf5 0%, #eff6ff 100%);
+  overflow: hidden;
+}
+
+/* 2) Contenedor centrado vertical+horizontal */
+.mainContent {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -60%); /* un poco arriba del centro exacto */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* 3) Íconos “esparcidos” */
+.icons {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+.iconLeaf { width: 50px; height: 50px; }
+.iconDrop { width: 22px; height: 30px; }
+.iconMoon { width: 27px; height: 36px; }
+
+/* 4) Titular multilínea */
+.title {
+  font-family: 'Inter', sans-serif;
+  font-size: 3rem;        /* 48px aprox */
+  line-height: 1.2;
+  color: #1f2937;         /* gray-800 */
+  margin: 0;
+}
+.highlight {
+  color: #10b981;         /* emerald-600 */
+}
+
+/* 5) Botones fijos abajo */
+.buttonWrapper {
+  position: absolute;
+  bottom: 2.5rem;         /* espacio desde el pie */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 1.5rem;
+}
+
+/* === FIGURAS DECORATIVAS === */
+.circleYellow {
+  position: absolute;
+  width: 24rem; height: 24rem;
+  left: 528px; top: 208px;
+  background-color: rgba(255, 251, 235, 0.3);
+  border-radius: 50%;
+}
+.circleGreen {
+  position: absolute;
+  width: 16rem; height: 16rem;
+  left: 80px; top: 80px;
+  background-color: rgba(209, 250, 229, 0.4);
+  border-radius: 50%;
+}
+.circleBlue {
+  position: absolute;
+  width: 18rem; height: 18rem;
+  left: 1072px; top: 432px;
+  background-color: rgba(219, 234, 254, 0.4);
+  border-radius: 50%;
+}
+.borderCircle1 {
+  position: absolute;
+  width: 5rem; height: 5rem;
+  left: 64px; top: 200px;
+  border: 2px solid rgba(167, 243, 208, 0.3);
+  border-radius: 50%;
+}
+.borderCircle2 {
+  position: absolute;
+  width: 4rem; height: 4rem;
+  left: 1296px; top: 536px;
+  border: 2px solid rgba(191, 219, 254, 0.3);
+  border-radius: 50%;
+}
+.borderCircle3 {
+  position: absolute;
+  width: 3rem; height: 3rem;
+  left: 1264px; top: 266px;
+  border: 2px solid rgba(253, 230, 138, 0.3);
+  border-radius: 50%;
+}
+.btnPrimary {
+  background-color: #10b981;
+  color: #ffffff;
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 9999px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+.btnPrimary:hover {
+  background-color: #0f9d5d;
+  box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+}
+
+.btnSecondary {
+  background: transparent;
+  color: #10b981;
+  padding: 0.75rem 2rem;
+  border: 2px solid #10b981;
+  border-radius: 9999px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.btnSecondary:hover {
+  background-color: #10b981;
+  color: #ffffff;
+}

@@ -1,0 +1,125 @@
+/* src/styles/themes.css */
+
+/* LifeSync Theme Variables */
+:root {
+  /* LifeSync Brand Colors - Orange, Black, Blue, Green */
+  --lifesync-orange: #FF6B35;
+  --lifesync-orange-light: #FFF4F0;
+  --lifesync-orange-dark: #E55A2B;
+  
+  --lifesync-black: #1A202C;
+  --lifesync-black-light: #2D3748;
+  --lifesync-black-lighter: #4A5568;
+  
+  --lifesync-blue: #2E86AB;
+  --lifesync-blue-light: #F0F7FB;
+  --lifesync-blue-dark: #256B87;
+  
+  --lifesync-green: #38A169;
+  --lifesync-green-light: #F0FFF4;
+  --lifesync-green-dark: #2F855A;
+  
+  /* LifeSync Header Theme */
+  --lifesync-header-bg: #FFFFFF;
+  --lifesync-header-border: rgba(46, 134, 171, 0.1);
+  --lifesync-header-text: var(--lifesync-black);
+  --lifesync-header-text-secondary: var(--lifesync-black-lighter);
+  
+  /* Navigation Colors */
+  --lifesync-nav-hover: rgba(255, 107, 53, 0.1);
+  --lifesync-nav-active: var(--lifesync-orange-light);
+  --lifesync-nav-active-text: var(--lifesync-orange);
+  --lifesync-nav-active-border: var(--lifesync-orange);
+  
+  /* Profile Colors */
+  --lifesync-profile-bg: linear-gradient(135deg, var(--lifesync-blue), var(--lifesync-green));
+  --lifesync-profile-dropdown-bg: #FFFFFF;
+  --lifesync-profile-dropdown-border: rgba(74, 85, 104, 0.1);
+  --lifesync-profile-dropdown-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  
+  /* Status Indicators */
+  --lifesync-sync-online: var(--lifesync-green);
+  --lifesync-sync-offline: #E53E3E;
+  --lifesync-sync-syncing: var(--lifesync-orange);
+}
+
+/* LifeSync Header Component Styles */
+.lifesync-header {
+  background-color: var(--lifesync-header-bg);
+  border-bottom: 1px solid var(--lifesync-header-border);
+  color: var(--lifesync-header-text);
+}
+
+.lifesync-brand {
+  color: var(--lifesync-header-text);
+}
+
+.lifesync-brand-accent {
+  background: linear-gradient(135deg, var(--lifesync-orange), var(--lifesync-orange-dark));
+}
+
+.lifesync-nav-item {
+  color: var(--lifesync-header-text-secondary);
+  transition: all 200ms ease-out;
+}
+
+.lifesync-nav-item:hover {
+  background-color: var(--lifesync-nav-hover);
+  color: var(--lifesync-header-text);
+}
+
+.lifesync-nav-item.active {
+  background-color: var(--lifesync-nav-active);
+  color: var(--lifesync-nav-active-text);
+  border-left: 4px solid var(--lifesync-nav-active-border);
+}
+
+.lifesync-profile-avatar {
+  background: var(--lifesync-profile-bg);
+}
+
+.lifesync-profile-dropdown {
+  background-color: var(--lifesync-profile-dropdown-bg);
+  border: 1px solid var(--lifesync-profile-dropdown-border);
+  box-shadow: var(--lifesync-profile-dropdown-shadow);
+}
+
+.lifesync-sync-status {
+  transition: all 200ms ease-out;
+}
+
+.lifesync-sync-status.online {
+  color: var(--lifesync-sync-online);
+}
+
+.lifesync-sync-status.offline {
+  color: var(--lifesync-sync-offline);
+}
+
+.lifesync-sync-status.syncing {
+  color: var(--lifesync-sync-syncing);
+  animation: pulse 2s infinite;
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+  .lifesync-header {
+    padding: 0.75rem 1rem;
+  }
+  
+  .lifesync-nav-item {
+    padding: 0.75rem;
+  }
+}
+
+/* Dark Theme Support (Optional) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --lifesync-header-bg: var(--lifesync-black);
+    --lifesync-header-text: #FFFFFF;
+    --lifesync-header-text-secondary: #CBD5E0;
+    --lifesync-header-border: rgba(255, 255, 255, 0.1);
+    --lifesync-profile-dropdown-bg: var(--lifesync-black-light);
+    --lifesync-profile-dropdown-border: rgba(255, 255, 255, 0.1);
+  }
+}

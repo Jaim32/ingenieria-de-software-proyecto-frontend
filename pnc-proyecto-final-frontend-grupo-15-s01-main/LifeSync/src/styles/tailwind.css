@@ -1,0 +1,864 @@
+/* ─────────────────────────────────────────
+   src/styles/tailwind.css
+   ───────────────────────────────────────── */
+
+/* Fuentes */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&display=swap");
+
+/* Import LifeSync themes */
+@import './themes.css';
+
+/* ---- Tailwind core ---- */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ───────────────────── TOKENS por defecto ───────────────────── */
+:root {
+  /* Primary */
+  --color-primary-50: #EEF2FF;
+  --color-primary-100: #E0E7FF;
+  --color-primary-200: #C7D2FE;
+  --color-primary-300: #A5B4FC;
+  --color-primary-400: #818CF8;
+  --color-primary-500: #6366F1;
+  --color-primary-600: #0f8f2f;
+  --color-primary-700: #4338CA;
+  --color-primary-800: #3730A3;
+  --color-primary-900: #312E81;
+
+  /* Agua (Hydro) */
+  --color-water-500: 196 100% 58%;
+
+  /* Secondary + Accent */
+  --color-secondary-600: #7C3AED;
+  --color-accent-500: #F59E0B;
+
+  /* Status */
+  --color-success-500: #10B981;
+  --color-warning-500: #F59E0B;
+
+  /* Background & texto */
+  --color-background-900: #EEF2FF;
+  --color-text-primary: #000;
+  --color-text-secondary: #94A3B8;
+
+  /* Borde y shadow */
+  --color-border: #334155;
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, .25),
+    0 2px 4px -1px rgba(0, 0, 0, .25);
+
+  /* Gradiente puente (por defecto) */
+  --gradient-start: var(--color-primary-600);
+  --gradient-end: var(--color-secondary-600);
+}
+
+
+
+.theme-ai-wellness-chat {
+  /* Primary Colors */
+  --color-primary: #22C55E;
+  --color-primary-50: #F0FDF4;
+  --color-primary-100: #DCFCE7;
+  --color-primary-500: #22C55E;
+  --color-primary-600: #16A34A;
+
+  /* Secondary Colors */
+  --color-secondary: #6B7280;
+  --color-secondary-100: #F3F4F6;
+  --color-secondary-200: #E5E7EB;
+
+  /* Accent Colors */
+  --color-accent: #059669;
+  --color-accent-500: #059669;
+  --color-accent-600: #047857;
+
+  /* Background & Surface */
+  --color-background-900: #F9FAFB;
+  --color-surface: #FFFFFF;
+
+  /* Text Colors */
+  --color-text-primary: #111827;
+  --color-text-secondary: #6B7280;
+
+  /* Status */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+
+  /* Sage Green Variations (para gradientes, si quieres) */
+  --color-sage-50: #F0FDF4;
+  --color-sage-100: #DCFCE7;
+
+  --chat-max-w: 64rem;
+  --chat-min-h: 75vh;
+}
+
+
+.theme-nutri {
+  /* Fondos & superficies */
+  --color-background-900: #FFFFFF;
+  /* fondo general */
+  --color-surface: #FFFFFF;
+  --color-border: #E5E7EB;
+
+  /* Texto */
+  --color-text-primary: #1F2937;
+  --color-text-secondary: #4B5563;
+
+  /* Paleta de marca */
+  --color-primary-600: #22C55E;
+  /* verde vibrante */
+  --color-secondary-600: #16A34A;
+  /* verde oscuro */
+  --color-accent-500: #F97316;
+  /* naranja */
+
+  /* Estados */
+  --color-success-500: #10B981;
+  --color-warning-500: #F59E0B;
+  --color-error-500: #EF4444;
+  /* ← añadido para etiquetas “inactive” */
+
+  /* Tintes opcionales */
+  --color-success-100: #D1FAE5;
+  --color-success-700: #047857;
+  --color-warning-100: #FEF3C7;
+  --color-warning-700: #B45309;
+  --color-error-100: #FEE2E2;
+  --color-error-700: #B91C1C;
+
+  /* Quick actions */
+  --quick-bg: #F0FDF4;
+  --quick-text: #1F2937;
+  --quick-border: #E5E7EB;
+
+  /* Gráficos */
+  --chart-ring-bg: #E5E7EB;
+  --chart-calories: #0F172A;
+  --chart-protein: var(--color-success-500);
+  --chart-carbs: var(--color-warning-500);
+  --chart-fats: #FF6700;
+
+  /* Gradiente por defecto */
+  --gradient-start: var(--color-primary-600);
+  --gradient-end: var(--color-secondary-600);
+}
+
+.theme-header {
+  /* Primary Colors */
+  --color-primary: #FF6B35;
+  --color-primary-50: #FFF4F0;
+  --color-primary-100: #FFE4D6;
+  --color-primary-500: #FF6B35;
+  --color-primary-600: #E55A2B;
+  --color-primary-700: #CC4A21;
+
+  /* Secondary Colors */
+  --color-secondary: #2E86AB;
+  --color-secondary-50: #F0F7FB;
+  --color-secondary-100: #D6EBFA;
+  --color-secondary-500: #3B9BC8;
+  --color-secondary-600: #2E86AB;
+  --color-secondary-700: #256B87;
+
+  /* Accent Colors */
+  --color-accent: #A23B72;
+  --color-accent-50: #FDF2F8;
+  --color-accent-100: #FCE7F3;
+  --color-accent-500: #C2185B;
+  --color-accent-600: #A23B72;
+  --color-accent-700: #8E1538;
+
+  /* Background Colors */
+  --color-background: #FAFBFC;
+  --color-surface: #FFFFFF;
+
+  /* Text Colors */
+  --color-text-primary: #1A202C;
+  --color-text-secondary: #4A5568;
+
+  /* Status Colors */
+  --color-success: #38A169;
+  --color-success-50: #F0FFF4;
+  --color-success-100: #C6F6D5;
+  --color-success-500: #48BB78;
+  --color-success-600: #38A169;
+
+  --color-warning: #D69E2E;
+  --color-warning-50: #FFFBEB;
+  --color-warning-100: #FEF3C7;
+  --color-warning-500: #F59E0B;
+  --color-warning-600: #D69E2E;
+
+  --color-error: #E53E3E;
+  --color-error-50: #FEF2F2;
+  --color-error-100: #FED7D7;
+  --color-error-500: #F56565;
+  --color-error-600: #E53E3E;
+}
+
+.theme-gamification {
+  --color-background-900: #F9FAFB;
+  --color-surface: #FFFFFF;
+  --color-border: #E5E7EB;
+
+  --color-text-primary: #111827;
+  --color-text-secondary: #6B7280;
+
+  --color-primary-600: #2563EB;
+  /* azul vivo */
+  --color-accent-500: #FBBF24;
+  /* oro */
+}
+
+.theme-historical {
+  --color-background-900: #FFFFFF;
+  --color-surface: #F8FAFC;
+  --color-border: #CBD5E1;
+
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+
+  --color-primary-600: #4F46E5;
+  --color-accent-500: #EC4899;
+}
+
+.theme-hydro {
+  --color-background-900: #FAFBFC;
+  --color-surface: #FFFFFF;
+  --color-border: #E5E7EB;
+
+  --color-text-primary: #1F2937;
+  --color-text-secondary: #6B7280;
+
+  --color-primary-600: #2563EB;
+  /* azul */
+  --color-secondary-600: #0891B2;
+  /* cian */
+  --color-accent-500: #06B6D4;
+
+  --color-success-500: #10B981;
+  --color-warning-500: #F59E0B;
+  --color-error-500: #EF4444;
+
+  --color-water-500: 196 100% 58%;
+  --gradient-start: var(--color-primary-600);
+  --gradient-end: var(--color-secondary-600);
+}
+
+.theme-sleep {
+  /* BACKGROUND & SURFACE */
+  --color-background-900: #0F172A;
+  /* slate-900 */
+  --color-surface: #1E293B;
+  /* slate-800 */
+  --color-border: #334155;
+  /* slate-700 */
+
+  /* TEXT */
+  --color-text-primary: #F8FAFC;
+  /* slate-50 */
+  --color-text-secondary: #94A3B8;
+  /* slate-400 */
+
+  /* PRIMARY – azul cielo */
+  --color-primary-600: #0EA5E9;
+  /* sky-600 */
+  --color-primary-500: #38BDF8;
+  /* sky-500 */
+
+  /* SECONDARY – cian verdoso */
+  --color-secondary-600: #06B6D4;
+  /* cyan-600 */
+
+  /* ACCENT – violeta suave */
+  --color-accent-500: #8B5CF6;
+  /* violet-500 */
+
+  /* STATUS (reusa los genéricos) */
+  --color-success-500: var(--color-success);
+  --color-warning-500: var(--color-warning);
+  --color-error-500: var(--color-error);
+
+  /* Gradiente de cabecera / highlights */
+  --gradient-start: var(--color-primary-600);
+  --gradient-end: var(--color-secondary-600);
+
+  /* Quick-action buttons */
+  --quick-bg: rgba(14, 165, 233, 0.1);
+  /* sky-600 @10 % */
+  --quick-text: #F8FAFC;
+  --quick-border: rgba(255, 255, 255, 0.08);
+}
+
+.theme-recipe {
+  --color-background-900: #FEFEFE;
+  --color-surface: #F8F9FA;
+  --color-border: #E9ECEF;
+
+  --color-text-primary: #2C3E50;
+  --color-text-secondary: #6C757D;
+
+  --color-primary-600: #FF6B35;
+  /* naranja */
+  --color-secondary-600: #2C3E50;
+  /* azul-gris */
+  --color-accent-500: #F39C12;
+
+  --color-success-500: #27AE60;
+  --color-warning-500: #E67E22;
+  --color-error-500: #E74C3C;
+
+  --gradient-start: var(--color-primary-600);
+  --gradient-end: var(--color-accent-500);
+}
+
+.theme-questions {
+  --gradient-start: #D7F7E7;
+  --gradient-end: #E6F3FF;
+
+  --color-background-900: var(--gradient-end);
+  --color-surface: #FFFFFF;
+  --color-border: #E5E7EB;
+
+  --color-text-primary: #1F2937;
+  --color-text-secondary: #6B7280;
+
+  --color-primary-600: #22C55E;
+}
+
+.theme-admin {
+  /* Fondos & texto */
+  --color-background-900: #FAFBFC;
+  /* off-white */
+  --color-surface: #FFFFFF;
+  --color-border: #E2E8F0;
+
+  --color-text-primary: #1E293B;
+  /* slate-800 */
+  --color-text-secondary: #64748B;
+  /* slate-500 */
+
+  /* Marca */
+  --color-primary-600: #2563EB;
+  /* blue-600 */
+  --color-primary-500: #3B82F6;
+  /* blue-500 */
+  --color-secondary-600: #64748B;
+  /* slate-500 */
+  --color-accent-500: #0EA5E9;
+  /* sky-500 */
+
+  /* Status (tints para badges) */
+  --color-success-100: #D1FAE5;
+  --color-success-700: #047857;
+
+  --color-warning-100: #FEF3C7;
+  --color-warning-700: #B45309;
+
+  --color-error-100: #FEE2E2;
+  --color-error-700: #B91C1C;
+  --color-error-500: #EF4444;
+
+  --color-accent-100: #E0F2FE;
+  --color-accent-700: #0369A1;
+
+  /* Quick buttons */
+  --quick-bg: #EFF6FF;
+  --quick-text: #1E293B;
+  --quick-border: #DBEAFE;
+
+  /* Gradiente */
+  --gradient-start: var(--color-primary-600);
+  --gradient-end: var(--color-accent-500);
+}
+
+
+.theme-taster {
+  --color-background-900: #FAFAFA;
+  --color-surface: #FFFFFF;
+  --color-border: #E5E7EB;
+
+  --color-text-primary: #1F2937;
+  --color-text-secondary: #6B7280;
+
+  --color-primary-600: #2D5A27;
+  --color-primary-500: #3C7B35;
+  --color-secondary-600: #E8F5E8;
+  --color-accent-500: #D97706;
+
+  --color-success-500: #059669;
+  --color-warning-500: #D97706;
+  --color-error-500: #DC2626;
+
+  --color-success-100: #D1FAE5;
+  --color-success-700: #047857;
+  --color-warning-100: #FEF3C7;
+  --color-warning-700: #B45309;
+  --color-error-100: #FEE2E2;
+  --color-error-700: #B91C1C;
+
+  --quick-bg: #E8F5E8;
+  --quick-text: #1F2937;
+  --quick-border: #D1D5DB;
+
+  --gradient-start: var(--color-primary-600);
+  --gradient-end: var(--color-accent-500);
+}
+
+.theme-sleep {
+  /* ----- FONDO Y SUPERFICIES ----- */
+  --color-background-900: #0F172A;
+  /* slate-900 */
+  --color-surface: #1E293B;
+  /* slate-800 */
+  --color-border: #334155;
+  /* slate-700 */
+
+  /* ----- TEXTO ----- */
+  --color-text-primary: #F8FAFC;
+  /* slate-50  */
+  --color-text-secondary: #94A3B8;
+  /* slate-400 */
+
+  /* ----- MARCA ----- */
+  --color-primary-50: #E0F2FE;
+  /* sky-50  (suave para ring/hover) */
+  --color-primary-400: #38BDF8;
+  /* sky-400 */
+  --color-primary-500: #0EA5E9;
+  /* sky-500 */
+  --color-primary-600: #0284C7;
+  /* sky-600 ← btn activo / foco */
+  --color-primary-700: #0369A1;
+
+  --color-secondary-600: #06B6D4;
+  /* cyan-600 (accent helpers) */
+  --color-accent-500: #8B5CF6;
+  /* violet-500 */
+
+  /* ----- ESTADOS ----- */
+  --color-success-500: #10B981;
+  /* emerald-500 */
+  --color-warning-500: #F59E0B;
+  /* amber-500 */
+  --color-error-500: #EF4444;
+  /* red-500 */
+
+  /* ----- QUICK ACTION (por si la usas) */
+  --quick-bg: rgba(14, 165, 233, 0.10);
+  /* sky-600 @10 % */
+  --quick-text: #F8FAFC;
+  --quick-border: rgba(255, 255, 255, 0.08);
+
+  /* Gradiente cabecera / highlights */
+  --gradient-start: var(--color-primary-600);
+  --gradient-end: var(--color-secondary-600);
+}
+
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    border-color: var(--color-border);
+  }
+
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-[color:var(--color-background-900)] text-[color:var(--color-text-primary)] antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* ───────────────────── COMPONENTS ───────────────────── */
+@layer components {
+
+
+
+  .wellness-card {
+    background: var(--color-surface);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  }
+
+  .wellness-transition {
+    transition: all 150ms ease-out;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply inline-flex items-center gap-1 rounded-md px-4 py-2 font-semibold text-white shadow transition-all duration-200 active:scale-95;
+    background-color: var(--color-primary-600);
+  }
+
+  .btn-primary:hover {
+    background-color: color-mix(in srgb,
+        var(--color-primary-600) 85%, #000 15%);
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-1 rounded-md border px-4 py-2 font-semibold transition-all duration-200 active:scale-95;
+    border-color: var(--color-primary-600);
+    color: var(--color-primary-600);
+  }
+
+  .btn-secondary:hover {
+    background-color: color-mix(in srgb,
+        var(--color-primary-600) 15%, transparent);
+  }
+
+  /* Cards */
+  .card {
+    @apply rounded-xl border p-6 shadow-md transition-all duration-200;
+    border-color: rgb(255 255 255 / .10);
+    background-color: rgb(255 255 255 / .05);
+    backdrop-filter: blur(8px);
+  }
+
+  /* Status badges */
+  .status-badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold uppercase tracking-wide;
+  }
+
+  .status-success {
+    @apply text-white;
+    background-color: var(--color-success-500);
+  }
+
+  .status-warning {
+    @apply text-white;
+    background-color: var(--color-warning-500);
+  }
+
+  .status-error {
+    @apply text-white;
+    background-color: var(--color-error-500);
+  }
+
+  /* Input genérico */
+  .input-field {
+    /* layout + tipografía */
+    @apply w-full rounded-md border bg-white px-3 py-2 text-sm transition-shadow duration-150 focus:outline-none;
+
+    /* color y borde */
+    color: var(--color-text-primary);
+    border-color: var(--color-border);
+  }
+
+  .input-field:focus {
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 2px var(--color-primary-500);
+  }
+
+  .input-field::placeholder {
+    color: var(--color-text-secondary);
+  }
+
+  .btn-primary-sleep {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium text-sm bg-primary-600 text-white shadow-lg ring-2 ring-primary-400\/40 transition-smooth active:scale-95;
+  }
+}
+
+/* ───────────────────── UTILITIES ───────────────────── */
+@layer utilities {
+
+  /* ─────────── Colores específicos “Nutri” ─────────── */
+  .bg-nutri-accent {
+    background-color: var(--color-accent-500);
+  }
+
+  .bg-nutri-warning {
+    background-color: var(--color-warning-500);
+  }
+
+  .bg-nutri-success {
+    background-color: var(--color-success-500);
+  }
+
+  .bg-nutri-secondary {
+    background-color: var(--color-secondary-600);
+  }
+
+  .bg-nutri-water {
+    background-color: hsl(var(--color-water-500));
+  }
+
+  /* ───────────  Superficies base  ─────────── */
+  .bg-surface {
+    background-color: var(--color-surface);
+  }
+
+  .bg-background {
+    background-color: var(--color-background-900);
+  }
+
+  .bg-secondary-100 {
+    background-color: var(--color-secondary-100);
+  }
+
+  /* ───────────  Bordes  ─────────── */
+  .border-border {
+    border-color: var(--color-border);
+  }
+
+  /* ───────────  Texto  ─────────── */
+  .text-primary {
+    color: var(--color-text-primary);
+  }
+
+  .text-secondary {
+    color: var(--color-text-secondary);
+  }
+
+  /* Alias para componentes que usan “text-text-*” */
+  .text-text-primary {
+    color: var(--color-text-primary);
+  }
+
+  .text-text-secondary {
+    color: var(--color-text-secondary);
+  }
+
+  /* ───────────  Helpers de marca  ─────────── */
+  .bg-primary {
+    background-color: var(--color-primary-600);
+  }
+
+  .bg-secondary {
+    background-color: var(--color-secondary-600);
+  }
+
+  .bg-success {
+    background-color: var(--color-success-500);
+  }
+
+  .bg-warning {
+    background-color: var(--color-warning-500);
+  }
+
+  .bg-error {
+    background-color: var(--color-error-500);
+  }
+
+  .bg-accent {
+    background-color: var(--color-accent-500);
+  }
+
+  .text-success {
+    color: var(--color-success-500);
+  }
+
+  .text-warning {
+    color: var(--color-warning-500);
+  }
+
+  .text-error {
+    color: var(--color-error-500);
+  }
+
+  /* ───────────  Tintes suaves  ─────────── */
+  /* SUCCESS */
+  .bg-success-10 {
+    background-color: color-mix(in srgb, var(--color-success-500) 10%, transparent);
+  }
+
+  .bg-success-20 {
+    background-color: color-mix(in srgb, var(--color-success-500) 20%, transparent);
+  }
+
+  .border-success-20 {
+    border-color: color-mix(in srgb, var(--color-success-500) 20%, transparent);
+  }
+
+  /* WARNING */
+  .bg-warning-10 {
+    background-color: color-mix(in srgb, var(--color-warning-500) 10%, transparent);
+  }
+
+  .bg-warning-20 {
+    background-color: color-mix(in srgb, var(--color-warning-500) 20%, transparent);
+  }
+
+  .border-warning-20 {
+    border-color: color-mix(in srgb, var(--color-warning-500) 20%, transparent);
+  }
+
+  /* ERROR */
+  .bg-error-10 {
+    background-color: color-mix(in srgb, var(--color-error-500) 10%, transparent);
+  }
+
+  .bg-error-20 {
+    background-color: color-mix(in srgb, var(--color-error-500) 20%, transparent);
+  }
+
+  .border-error-20 {
+    border-color: color-mix(in srgb, var(--color-error-500) 20%, transparent);
+  }
+
+  /* ACCENT */
+  .bg-accent-10 {
+    background-color: color-mix(in srgb, var(--color-accent-500) 10%, transparent);
+  }
+
+  .bg-accent-20 {
+    background-color: color-mix(in srgb, var(--color-accent-500) 20%, transparent);
+  }
+
+  .border-accent-20 {
+    border-color: color-mix(in srgb, var(--color-accent-500) 20%, transparent);
+  }
+
+  /* ───────────  Sombras & transiciones  ─────────── */
+  .shadow-elevation-1 {
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 /.1), 0 1px 2px 0 rgb(0 0 0 /.06);
+  }
+
+  .shadow-elevation-2 {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 /.1), 0 2px 4px -2px rgb(0 0 0 /.1);
+  }
+
+  .transition-smooth {
+    transition: all .2s cubic-bezier(.4, 0, .2, 1);
+  }
+
+  .transition-layout {
+    transition: all .3s cubic-bezier(.4, 0, .2, 1);
+  }
+
+  .backdrop-blur-glass {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .hover-lift {
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* ───────────  Ring helpers  ─────────── */
+  .ring-primary {
+    --tw-ring-color: var(--color-primary-600);
+  }
+
+  .ring-primary\/20 {
+    --tw-ring-color: color-mix(in srgb, var(--color-primary-600) 20%, transparent);
+  }
+
+  .ring-primary-400 {
+    --tw-ring-color: var(--color-primary-400);
+  }
+
+  .ring-primary-400\/40 {
+    --tw-ring-color: color-mix(in srgb, var(--color-primary-400) 40%, transparent);
+  }
+
+  /* ───────────  Superficie translúcida  ─────────── */
+  .bg-surface\/80 {
+    background-color: color-mix(in srgb, var(--color-surface) 80%, transparent);
+  }
+
+  /* ───────────  Bridging grays de Tailwind → tokens  ─────────── */
+  .text-gray-400,
+  .text-slate-400 {
+    color: var(--color-text-secondary);
+  }
+
+  .text-gray-500,
+  .text-gray-600,
+  .text-slate-50,
+  .text-white,
+  .text-black,
+  .text-gray-900,
+  .text-gray-800,
+  .text-slate-900,
+  .text-slate-800 {
+    color: var(--color-text-primary);
+  }
+
+  .bg-slate-800,
+  .bg-gray-800 {
+    background-color: var(--color-surface);
+  }
+
+  .border-slate-700,
+  .border-gray-700 {
+    border-color: var(--color-border);
+  }
+
+  /* ───────────  Colores de calidad  (fondos) ─────────── */
+  .bg-quality-min {
+    background-color: rgb(148 163 184 / .04);
+  }
+
+  /* slate-400 @4 % */
+  .bg-quality-opt {
+    background-color: rgb(14 165 233 / .08);
+  }
+
+  /* sky-500  @8 % */
+  .bg-quality-good {
+    background-color: rgb(16 185 129 / .08);
+  }
+
+  /* emerald-500 */
+  .bg-quality-ext {
+    background-color: rgb(255 255 255 / .02);
+  }
+
+  /* sutil   */
+
+  /* ───────────  Colores de calidad  (texto NUEVO) ─────────── */
+  .text-quality-min {
+    color: var(--color-text-secondary);
+  }
+
+  /* gris    */
+  .text-quality-opt {
+    color: var(--color-primary-400);
+  }
+
+  /* azul    */
+  .text-quality-good {
+    color: var(--color-success-500);
+  }
+
+  /* verde   */
+  .text-quality-ext {
+    color: var(--color-accent-500);
+  }
+
+  /* violeta */
+
+  /* ───────────  Helpers de acento directo  ─────────── */
+  .text-accent {
+    color: var(--color-accent-500);
+  }
+
+  .text-primary-500 {
+    color: var(--color-primary-500);
+  }
+
+  .text-primary-600 {
+    color: var(--color-primary-600);
+  }
+
+  .text-success-500 {
+    color: var(--color-success-500);
+  }
+
+}
