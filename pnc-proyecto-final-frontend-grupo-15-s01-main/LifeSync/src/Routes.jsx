@@ -26,7 +26,7 @@ import AddEditTasterProfile from "pages/add-edit-taster-profile";
 import RecipePreviewModal from "pages/recipe-preview-modal";
 import RecipeModerationDashboard from "pages/recipe-moderation-dashboard";
 import NotFound from "pages/NotFound";
-import AIWellnessChat from "./pages/ai-wellness-chat";
+import CommunityForum from "pages/community-forum";
 import QuestionFlowInterface from ".//pages/question-flow-interface";
 import AuthenticationFlowInterface from "./pages/authentication-flow-interface";
 import ModuleNavigationHeader from "./components/ui/ModuleNavigationHeader";
@@ -47,7 +47,7 @@ export default function AppRoutes() {
              RUTAS CON HEADER (MainLayout)
              Aquí MainLayout renderiza el ModuleNavigationHeader + <Outlet/>
           ──────────────────────────────────────────────────────────────────────────── */}
-          <Route element={< ModuleNavigationHeader />}>
+          <Route element={<ModuleNavigationHeader />}>
             <Route
               path="recipe-moderation-dashboard"
               element={<RecipeModerationDashboard />}
@@ -76,7 +76,6 @@ export default function AppRoutes() {
               path="gamification-progress-tracking-dashboard"
               element={<GamificationProgressTrackingDashboard />}
             />
-            <Route path="ai-wellness-chat" element={<AIWellnessChat />} />
             <Route
               path="calorie-tracking-dashboard"
               element={<CalorieTrackingDashboard />}
@@ -94,6 +93,7 @@ export default function AppRoutes() {
               element={<RecipeCreationForm />}
             />
             <Route path="recipe-detail-view" element={<RecipeDetailView />} />
+            <Route path="community-forum" element={<CommunityForum />} />
           </Route>
 
           {/* ────────────────────────────────────────────────────────────────────
@@ -110,8 +110,6 @@ export default function AppRoutes() {
               </NavigationStateProvider>
             }
           >
-            
-
             <Route
               path="authentication-flow-interface"
               element={<AuthenticationFlowInterface />}
