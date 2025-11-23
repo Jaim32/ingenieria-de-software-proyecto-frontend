@@ -1,54 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet";
+import axios from "axios";
+
 import ForumHeader from "./components/ForumHeader";
 import ForumFilterBar from "./components/ForumFilterBar";
 import PostsGrid from "./components/PostGrid";
 import NewPostModal from "./components/NewPostModal";
 import PostDetailModal from "./components/PostDetailModal";
 
-export default function CommunityForum() {
-  const [posts, setPosts] = useState([
-    {
-      id: 1,
-      title: "Best Pre-Workout Meals for Energy",
-      description:
-        "Post your favorite meals that balance calories and performance.",
-      category: "Food",
-      author: "Ana García",
-      avatar: "AG",
-      image:
-        "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800",
-      likes: 24,
-      comments: [],
-    },
-    {
-      id: 2,
-      title: "Sleep Hacks for Busy Schedules",
-      description:
-        "How do you use the app to optimize sleep when you have limited hours?",
-      category: "Sleep",
-      author: "Carlos Ruiz",
-      avatar: "CR",
-      image:
-        "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800",
-      likes: 42,
-      comments: [],
-    },
-    {
-      id: 3,
-      title: "Morning vs. Night Training",
-      description:
-        "Discuss how sleep and hydration affect your workout timing.",
-      category: "Training",
-      author: "María López",
-      avatar: "ML",
-      image:
-        "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800",
-      likes: 18,
-      comments: [],
-    },
-  ]);
-
+const CommunityForum = () => {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showNewPostModal, setShowNewPostModal] = useState(false);
   const [showPostDetailModal, setShowPostDetailModal] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
@@ -62,29 +24,158 @@ export default function CommunityForum() {
     imagePreview: null,
   });
 
-  const handleCreatePost = (postData) => {
-    const post = {
-      id: Date.now(),
-      title: postData.title,
-      description: postData.description,
-      category: postData.category,
-      author: "Usuario",
-      avatar: "U",
-      image:
-        postData.imagePreview ||
-        "https://images.unsplash.com/photo-1557683316-973673baf926?w=800",
-      likes: 0,
-      comments: [],
-    };
-    setPosts([post, ...posts]);
-    setNewPost({
-      title: "",
-      description: "",
-      category: "Food",
-      image: null,
-      imagePreview: null,
-    });
-    setShowNewPostModal(false);
+  const token = localStorage.getItem("token");
+
+  /* ===========================================================
+     Cargar posts + comentarios
+  ============================================================== */
+  const fetchPosts = async () => {
+    if (!token) return console.error("Token missing");
+
+    try {
+      setLoading(true);
+
+      const res = await axios.get("http://localhost:8082/api/posts", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      let postsData = Array.isArray(res.data) ? res.data : [];
+
+      // Obtener comentarios por post
+      const postsWithComments = await Promise.all(
+        postsData.map(async (p) => {
+          try {
+            const commentsRes = await axios.get(
+              `http://localhost:8082/api/posts/${p.idPost}/comentarios`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            // Normalizar comentarios e incluir nombreUsuario
+            let comments = commentsRes.data.map((c) => ({
+              id: c.idComentario,
+              text: c.contenido,
+              timestamp: c.fecha || "",
+              userId: c.idUser,
+              author: c.nombreUsuario || "Usuario",
+              avatar: c.nombreUsuario
+                ? c.nombreUsuario[0].toUpperCase()
+                : "U",
+              _raw: c,
+            }));
+
+            return { ...p, comments };
+          } catch {
+            return { ...p, comments: [] };
+          }
+        })
+      );
+
+      // Normalizar posts
+      const normalized = postsWithComments.map((p) => ({
+        idPost: p.idPost,
+        title: p.title,
+        description: p.content || p.description,
+        category: p.type || "General",
+        image: p.image || "https://images.unsplash.com/photo-1557683316-973673baf926?w=800",
+        likes: p.likes ?? 0,
+        comments: p.comments,
+        userId: p.userId,
+        author: p.nombreUsuario || "Desconocido",
+        avatar: p.nombreUsuario
+          ? p.nombreUsuario[0].toUpperCase()
+          : "U",
+        _raw: p,
+      }));
+
+      setPosts(normalized);
+    } catch (err) {
+      console.error("Error cargando posts:", err);
+      setPosts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  /* ===========================================================
+     Crear nuevo post
+  ============================================================== */
+  const handleCreatePost = async (postData) => {
+    if (!token) return;
+
+    try {
+      const userId = localStorage.getItem("userId");
+
+      await axios.post(
+        "http://localhost:8082/api/posts",
+        {
+          title: postData.title,
+          content: postData.description,
+          type: "general",
+          userId,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      await fetchPosts();
+      setShowNewPostModal(false);
+      setNewPost({ title: "", description: "", category: "Food", image: null, imagePreview: null });
+    } catch (err) {
+      console.error("Error creando post:", err);
+    }
+  };
+
+  /* ===========================================================
+     Agregar comentario
+  ============================================================== */
+  const handleAddComment = async (commentText, postId) => {
+    if (!token || !commentText.trim()) return;
+
+    try {
+      const res = await axios.post(
+        `http://localhost:8082/api/posts/${postId}/comentarios`,
+        { contenido: commentText },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const c = res.data;
+
+      let newComment = {
+        id: c.idComentario,
+        text: c.contenido,
+        timestamp: c.fecha || "Just now",
+        userId: c.idUser,
+        author: c.nombreUsuario,
+        avatar: c.nombreUsuario
+          ? c.nombreUsuario[0].toUpperCase()
+          : "U",
+        _raw: c,
+      };
+
+      // Actualizar posts
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.idPost === postId
+            ? { ...p, comments: [...p.comments, newComment] }
+            : p
+        )
+      );
+
+      // Actualizar modal abierto
+      if (selectedPost?.idPost === postId) {
+        setSelectedPost((prev) => ({
+          ...prev,
+          comments: [...prev.comments, newComment],
+        }));
+      }
+
+      return newComment;
+    } catch (err) {
+      console.error("Error agregando comentario:", err.response?.data || err);
+    }
   };
 
   const handleOpenPost = (post) => {
@@ -92,38 +183,14 @@ export default function CommunityForum() {
     setShowPostDetailModal(true);
   };
 
-  const handleAddComment = (commentText) => {
-    if (commentText.trim() && selectedPost) {
-      const comment = {
-        id: Date.now(),
-        author: "Usuario",
-        avatar: "U",
-        text: commentText,
-        timestamp: "Ahora",
-      };
-
-      setPosts(
-        posts.map((post) =>
-          post.id === selectedPost.id
-            ? { ...post, comments: [...post.comments, comment] }
-            : post
-        )
-      );
-
-      setSelectedPost({
-        ...selectedPost,
-        comments: [...selectedPost.comments, comment],
-      });
-    }
-  };
-
   const handleLike = (postId) => {
-    setPosts(
-      posts.map((post) =>
-        post.id === postId ? { ...post, likes: post.likes + 1 } : post
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.idPost === postId ? { ...p, likes: p.likes + 1 } : p
       )
     );
-    if (selectedPost && selectedPost.id === postId) {
+
+    if (selectedPost?.idPost === postId) {
       setSelectedPost({
         ...selectedPost,
         likes: selectedPost.likes + 1,
@@ -147,7 +214,11 @@ export default function CommunityForum() {
             onNewPost={() => setShowNewPostModal(true)}
           />
 
-          <PostsGrid posts={posts} onOpenPost={handleOpenPost} />
+          {loading ? (
+            <p className="text-center text-gray-500">Loading posts...</p>
+          ) : (
+            <PostsGrid posts={posts} onOpenPost={handleOpenPost} />
+          )}
         </div>
 
         {showNewPostModal && (
@@ -170,4 +241,6 @@ export default function CommunityForum() {
       </div>
     </>
   );
-}
+};
+
+export default CommunityForum;
