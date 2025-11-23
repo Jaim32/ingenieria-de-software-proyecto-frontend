@@ -1,28 +1,78 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { X, Image } from 'lucide-react';
+import axios from 'axios';
 
 export default function NewPostModal({ newPost, setNewPost, onClose, onCreate }) {
-  const handleImageUpload = (e) => {
+
+  const [uploading, setUploading] = useState(false);
+
+  /* ===========================================================
+      SUBIR IMAGEN AL MINI SERVIDOR (4029) Y GUARDAR imagePath
+  ============================================================== */
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewPost({
-          ...newPost,
-          image: file,
-          imagePreview: reader.result
-        });
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // preview local
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setNewPost((prev) => ({
+        ...prev,
+        imagePreview: reader.result
+      }));
+    };
+    reader.readAsDataURL(file);
+
+    // subir archivo real
+    try {
+      setUploading(true);
+
+      const formDataImg = new FormData();
+      formDataImg.append("file", file);
+
+      const res = await fetch("http://localhost:4029/uploads", {
+        method: "POST",
+        body: formDataImg,
+      });
+
+      const data = await res.json();
+
+      if (data.imagePath) {
+        setNewPost((prev) => ({
+          ...prev,
+          image: file,               // archivo original
+          imagePreview: reader.result, 
+          imagePath: data.imagePath  // ruta real "/uploads/XXXX.jpg"
+        }));
+      }
+    } catch (err) {
+      console.error("Error subiendo imagen:", err);
+      alert("Error uploading image.");
+    } finally {
+      setUploading(false);
     }
   };
 
+
+  /* ===========================================================
+      CREAR POST - LLAMA AL PADRE
+  ============================================================== */
   const handleSubmit = async () => {
-  if (newPost.title && newPost.description) {
-    // 🔹 Espera la promesa para que luego el padre cierre y refresque
-    await onCreate(newPost);
-  }
-};
+    if (!newPost.title || !newPost.description) return;
+
+    await onCreate(newPost); // envía la info al padre (CommunityForum)
+
+    // limpiar estado
+    setNewPost({
+      title: "",
+      description: "",
+      category: "Food",
+      image: null,
+      imagePreview: null,
+      imagePath: ""
+    });
+  };
+
 
   return (
     <div
@@ -32,6 +82,8 @@ export default function NewPostModal({ newPost, setNewPost, onClose, onCreate })
       }}
     >
       <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-auto">
+        
+        {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
           <h2 className="text-xl font-bold text-gray-900">Create New Post</h2>
           <button
@@ -42,7 +94,10 @@ export default function NewPostModal({ newPost, setNewPost, onClose, onCreate })
           </button>
         </div>
 
+        {/* Body */}
         <div className="p-6 space-y-4">
+
+          {/* TITULO */}
           <input
             type="text"
             placeholder="Post Title"
@@ -51,6 +106,7 @@ export default function NewPostModal({ newPost, setNewPost, onClose, onCreate })
             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-base focus:border-indigo-500 focus:outline-none transition-colors"
           />
 
+          {/* DESCRIPCION */}
           <textarea
             placeholder="Post Description"
             value={newPost.description}
@@ -59,6 +115,7 @@ export default function NewPostModal({ newPost, setNewPost, onClose, onCreate })
             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-base resize-none focus:border-indigo-500 focus:outline-none transition-colors"
           />
 
+          {/* CATEGORIA */}
           <select
             value={newPost.category}
             onChange={(e) => setNewPost({ ...newPost, category: e.target.value })}
@@ -70,6 +127,7 @@ export default function NewPostModal({ newPost, setNewPost, onClose, onCreate })
             <option value="Hydration">Hydration</option>
           </select>
 
+          {/* INPUT REAL OCULTO */}
           <input
             type="file"
             accept="image/*"
@@ -78,6 +136,7 @@ export default function NewPostModal({ newPost, setNewPost, onClose, onCreate })
             id="imageUpload"
           />
 
+          {/* SI YA HAY IMAGEN */}
           {newPost.imagePreview ? (
             <div className="space-y-3">
               <img
@@ -85,23 +144,32 @@ export default function NewPostModal({ newPost, setNewPost, onClose, onCreate })
                 alt="Preview"
                 className="w-full max-h-72 object-cover rounded-xl"
               />
+
               <button
-                onClick={() => setNewPost({ ...newPost, image: null, imagePreview: null })}
+                onClick={() => setNewPost({ ...newPost, image: null, imagePreview: null, imagePath: "" })}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
               >
                 Remove Image
               </button>
+
+              {uploading && (
+                <p className="text-sm text-indigo-600 font-medium">Uploading image...</p>
+              )}
             </div>
           ) : (
+            /* SI NO HAY IMAGEN */
             <label
               htmlFor="imageUpload"
               className="flex flex-col items-center justify-center w-full p-10 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-indigo-500 hover:bg-gray-50 transition-all"
             >
               <Image size={48} className="text-gray-400 mb-3" />
-              <p className="text-gray-500 font-medium">Click to upload image</p>
+              <p className="text-gray-500 font-medium">
+                {uploading ? "Uploading..." : "Click to upload image"}
+              </p>
             </label>
           )}
 
+          {/* BOTÓN PUBLICAR */}
           <button
             onClick={handleSubmit}
             className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold text-base shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"

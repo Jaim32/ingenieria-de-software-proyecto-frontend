@@ -1,21 +1,69 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import Icon from '../AppIcon';
-import Image from '../AppImage';
+import React, { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import Icon from "../AppIcon";
+import Image from "../AppImage";
 
-function RecipeDetailModal({ isOpen, onClose, recipe }) {
+/* ===========================================================
+   CONFIRMACIÓN UNIVERSAL
+=========================================================== */
+function ConfirmDialog({ open, title, message, onCancel, onConfirm }) {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-40 z-[9999] flex items-center justify-center">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-md border shadow-xl space-y-4">
+        <h2 className="text-lg font-bold">{title}</h2>
+        <p className="text-gray-700">{message}</p>
+
+        <div className="flex justify-end gap-3">
+          <button
+            className="px-4 py-2 bg-gray-200 rounded-xl"
+            onClick={onCancel}
+          >
+            Cancel
+          </button>
+          <button
+            className="px-4 py-2 bg-red-600 text-white rounded-xl"
+            onClick={onConfirm}
+          >
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ===========================================================
+   MODAL PRINCIPAL
+=========================================================== */
+export default function RecipeDetailModal({ isOpen, onClose, recipe }) {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Siempre en el mismo orden
   const [comments, setComments] = useState([]);
-  const [isCommentPopupOpen, setIsCommentPopupOpen] = useState(false);
-  const [commentText, setCommentText] = useState('');
+  const [editingId, setEditingId] = useState(null);
+  const [editText, setEditText] = useState("");
 
-  // ===========================================================
-  // 🔄 CARGAR COMENTARIOS AL ABRIR LA RECETA
-  // ===========================================================
+  const [isCommentPopupOpen, setIsCommentPopupOpen] = useState(false);
+  const [commentText, setCommentText] = useState("");
+
+  const [confirmData, setConfirmData] = useState({
+    open: false,
+    title: "",
+    message: "",
+    onConfirm: null,
+  });
+
+  const token = localStorage.getItem("token");
+  const currentUserId = localStorage.getItem("userId");
+
+  /* ===========================================================
+     CARGAR COMENTARIOS
+  =========================================================== */
   useEffect(() => {
-    if (!recipe?.idReceta) return;
+    if (!isOpen || !recipe?.idReceta) return;
 
     const loadComments = async () => {
       try {
@@ -23,96 +71,53 @@ function RecipeDetailModal({ isOpen, onClose, recipe }) {
           `http://localhost:8082/api/recetas/${recipe.idReceta}/comentarios`,
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
             },
           }
         );
 
         if (!res.ok) return;
-
         const data = await res.json();
-        setComments(data);
+
+        setComments(data || []);
       } catch (err) {
         console.error("Error loading comments:", err);
       }
     };
 
     loadComments();
-  }, [recipe?.idReceta]);
+  }, [isOpen, recipe?.idReceta]);
 
-  // ===========================================================
-  // 🔗 SINCRONIZAR URL CON EL MODAL
-  // ===========================================================
+  /* ===========================================================
+     SINCRONIZAR URL
+  =========================================================== */
   useEffect(() => {
+    if (!recipe) return;
+
+    const params = new URLSearchParams(location.search);
+
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      const params = new URLSearchParams(location.search);
-      params.set('recipe', recipe?.idReceta?.toString() || 'preview');
-
-      navigate(`${location.pathname}?${params.toString()}`, {
-        replace: true,
-      });
+      document.body.style.overflow = "hidden";
+      params.set("recipe", recipe.idReceta);
     } else {
-      document.body.style.overflow = 'unset';
-      const params = new URLSearchParams(location.search);
-      params.delete('recipe');
-      const newSearch = params.toString();
-
-      navigate(
-        `${location.pathname}${newSearch ? `?${newSearch}` : ''}`,
-        { replace: true }
-      );
+      document.body.style.overflow = "unset";
+      params.delete("recipe");
     }
+
+    navigate(`${location.pathname}?${params.toString()}`, { replace: true });
 
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     };
-  }, [isOpen, recipe?.idReceta, location.pathname, navigate]);
+  }, [isOpen, recipe, navigate, location.pathname]);
 
-  // ===========================================================
-  // ESCAPE y BACKDROP
-  // ===========================================================
-  const handleBackdropClick = (e) => {
-    if (e.target === e.currentTarget) onClose();
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Escape') onClose();
-  };
-
-  useEffect(() => {
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      return () => document.removeEventListener('keydown', handleKeyDown);
-    }
-  }, [isOpen]);
-
-  if (!isOpen || !recipe) return null;
-
-  // ===========================================================
-  // POPUP COMENTARIOS
-  // ===========================================================
-  const openCommentPopup = () => {
-    setIsCommentPopupOpen(true);
-    setCommentText('');
-  };
-
-  const closeCommentPopup = () => {
-    setIsCommentPopupOpen(false);
-    setCommentText('');
-  };
-
-  // ===========================================================
-  // 📝 GUARDAR COMENTARIO EN EL BACKEND
-  // ===========================================================
+  /* ===========================================================
+     GUARDAR NUEVO COMENTARIO
+  =========================================================== */
   const handleSaveComment = async () => {
-    const text = commentText.trim();
-    if (!text) return;
+    if (!commentText.trim()) return;
 
     try {
-      const token = localStorage.getItem("token");
-
       const res = await fetch(
         `http://localhost:8082/api/recetas/${recipe.idReceta}/comentarios`,
         {
@@ -121,200 +126,245 @@ function RecipeDetailModal({ isOpen, onClose, recipe }) {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ contenido: text }),
+          body: JSON.stringify({ contenido: commentText }),
         }
       );
 
-      if (!res.ok) {
-        console.error("Error response:", res.status);
-        return;
-      }
+      if (!res.ok) return;
 
       const newComment = await res.json();
-
       setComments((prev) => [...prev, newComment]);
-      closeCommentPopup();
+
+      setIsCommentPopupOpen(false);
+      setCommentText("");
     } catch (err) {
-      console.error("Error posting comment:", err);
+      console.error(err);
     }
   };
 
-  // ===========================================================
-  // JSX
-  // ===========================================================
+  /* ===========================================================
+     ELIMINAR COMENTARIO
+  =========================================================== */
+  const handleDelete = (id) => {
+    setConfirmData({
+      open: true,
+      title: "Delete comment",
+      message: "Are you sure you want to delete this comment?",
+      onConfirm: async () => {
+        try {
+          await fetch(`http://localhost:8082/api/comentarios/${id}`, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              userId: currentUserId,
+            },
+          });
+
+          setComments((prev) =>
+            prev.filter((c) => c.idComentario !== id)
+          );
+        } catch (err) {
+          console.error(err);
+        }
+      },
+    });
+  };
+
+  /* ===========================================================
+     GUARDAR EDICIÓN
+  =========================================================== */
+  const handleEditSave = (id) => {
+    setConfirmData({
+      open: true,
+      title: "Save changes",
+      message: "Do you want to update this comment?",
+      onConfirm: async () => {
+        try {
+          await fetch(`http://localhost:8082/api/comentarios/${id}`, {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+              userId: currentUserId,
+            },
+            body: JSON.stringify({ contenido: editText }),
+          });
+
+          setComments((prev) =>
+            prev.map((c) =>
+              c.idComentario === id ? { ...c, contenido: editText } : c
+            )
+          );
+
+          setEditingId(null);
+        } catch (err) {
+          console.error(err);
+        }
+      },
+    });
+  };
+
+  /* ===========================================================
+     NO MOSTRAR UI SI NO ESTÁ ABIERTO
+  =========================================================== */
+  if (!isOpen || !recipe) return null;
+
+  /* ===========================================================
+     UI
+  =========================================================== */
   return (
     <div
-      className="fixed inset-0 z-modal-backdrop bg-black bg-opacity-50 flex items-center justify-center px-4 py-6"
-      onClick={handleBackdropClick}
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-background rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden border border-border-color">
+      <div className="bg-background w-full max-w-3xl max-h-[90vh] rounded-2xl overflow-hidden flex flex-col border">
 
         {/* HEADER */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border-color bg-background">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="h-8 w-8 rounded-xl bg-primary flex items-center justify-center">
-              <Icon name="Utensils" size={18} className="text-white" />
-            </div>
-            <h2 className="font-heading font-heading-bold text-base md:text-lg text-text-primary truncate">
-              {recipe.nombre}
-            </h2>
-          </div>
+        <div className="flex items-center justify-between px-6 py-4 border-b">
+          <h2 className="font-heading text-lg">
+            {recipe.nombre ?? "Untitled"}
+          </h2>
 
-          <button
-            onClick={onClose}
-            className="p-2 rounded-full text-text-secondary hover:bg-surface hover:text-text-primary"
-          >
+          <button onClick={onClose}>
             <Icon name="X" size={20} />
           </button>
         </div>
 
         {/* BODY */}
-        <div className="flex-1 overflow-y-auto relative">
-
-          {/* IMAGEN */}
+        <div className="p-6 overflow-y-auto space-y-6">
           {recipe.imagen && (
             <Image
               src={recipe.imagen}
               alt={recipe.nombre}
-              className="w-full h-56 md:h-72 object-cover"
+              className="w-full h-64 object-cover rounded-xl"
             />
           )}
 
-          <div className="px-6 pb-6 pt-4 space-y-6">
+          <section className="bg-surface p-4 rounded-xl border">
+            <h3 className="font-heading text-lg mb-2">Description</h3>
+            <p className="text-gray-700">
+              {recipe.descripcion || "No description available"}
+            </p>
+          </section>
 
-            {/* TÍTULO */}
-            <div className="space-y-2">
-              <h1 className="font-heading font-heading-bold text-2xl md:text-3xl text-text-primary">
-                {recipe.nombre}
-              </h1>
+          {/* COMENTARIOS */}
+          <section className="bg-surface p-4 rounded-xl border space-y-4">
+            <h3 className="font-heading text-lg">
+              Comments ({comments.length})
+            </h3>
 
-              {recipe.tipoDeComida && (
-                <span className="inline-flex items-center rounded-full bg-primary text-white text-xs font-medium px-3 py-1">
-                  {recipe.tipoDeComida}
-                </span>
-              )}
-            </div>
+            <ul className="space-y-3">
+              {comments.map((c) => (
+                <li
+                  key={c.idComentario}
+                  className="border p-4 rounded-xl bg-background"
+                >
+                  <div className="font-semibold">{c.nombreUsuario}</div>
 
-            {/* DESCRIPCIÓN */}
-            <section className="bg-surface border border-border-color rounded-xl px-5 py-4">
-              <h3 className="font-heading text-lg text-text-primary mb-2">
-                Description
-              </h3>
-              <p className="text-sm md:text-base text-text-secondary">
-                {recipe.descripcion || 'N/A'}
-              </p>
-            </section>
+                  {editingId === c.idComentario ? (
+                    <>
+                      <textarea
+                        className="w-full border rounded-xl p-2 mt-2"
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                      />
+                      <button
+                        onClick={() => handleEditSave(c.idComentario)}
+                        className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-xl"
+                      >
+                        Save
+                      </button>
+                    </>
+                  ) : (
+                    <p className="text-gray-700 mt-1">{c.contenido}</p>
+                  )}
 
-            {/* COMENTARIOS */}
-            <section className="bg-surface border border-border-color rounded-xl px-5 py-4 space-y-3">
-              <div className="flex items-center gap-2">
-                <Icon name="MessageCircle" size={18} />
-                <h3 className="font-heading text-lg text-text-primary">
-                  Comments ({comments.length})
-                </h3>
-              </div>
-
-              {comments.length === 0 ? (
-                <p className="text-sm text-text-secondary">
-                  No comments yet. Be the first to comment.
-                </p>
-              ) : (
-                <ul className="space-y-3">
-                  {comments.map((c) => (
-                    <li
-                      key={c.idComentario}
-                      className="rounded-xl border border-border-color bg-background px-4 py-3 text-sm"
-                    >
-                      <div className="font-semibold text-text-primary">
-                        {c.nombreUsuario}
-                      </div>
-                      <div className="text-text-primary">{c.contenido}</div>
-                      <div className="text-xs text-text-secondary">
-                        {new Date(c.createdAt).toLocaleString()}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-
-            {/* BOTÓN PARA COMENTAR */}
-            <div className="flex justify-end pt-1">
-              <button
-                className="
-                  inline-flex items-center justify-center gap-2 px-6 py-3
-                  rounded-xl bg-primary text-white text-sm font-medium shadow
-                  hover:bg-primary/90
-                "
-                onClick={openCommentPopup}
-              >
-                <Icon name="MessageCircle" size={18} />
-                <span>Comment</span>
-              </button>
-            </div>
-          </div>
-
-          {/* POPUP DE COMENTARIO */}
-          {isCommentPopupOpen && (
-            <div
-              className="fixed inset-0 z-[9999] bg-black bg-opacity-50 flex items-center justify-center px-4"
-              onClick={(e) => {
-                e.stopPropagation();
-                closeCommentPopup();
-              }}
-            >
-              <div
-                className="bg-background w-full max-w-md rounded-2xl shadow-xl border border-border-color p-5 space-y-4"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Icon name="MessageCircle" size={18} />
-                    <h3 className="text-base font-heading font-heading-bold text-text-primary">
-                      Add comment
-                    </h3>
+                  <div className="text-xs text-gray-500 mt-1">
+                    {new Date(c.createdAt).toLocaleString()}
                   </div>
 
-                  <button
-                    className="p-1.5 rounded-full hover:bg-surface text-text-secondary"
-                    onClick={closeCommentPopup}
-                  >
-                    <Icon name="X" size={18} />
-                  </button>
-                </div>
+                  {c.idUser === currentUserId &&
+                    editingId !== c.idComentario && (
+                      <div className="flex gap-4 mt-3">
+                        <button
+                          className="text-blue-600 hover:underline"
+                          onClick={() => {
+                            setEditingId(c.idComentario);
+                            setEditText(c.contenido);
+                          }}
+                        >
+                          Edit
+                        </button>
 
-                <textarea
-                  rows={4}
-                  className="w-full rounded-xl border border-border-color bg-background px-3 py-2 text-sm text-text-primary focus:ring-2 focus:ring-primary"
-                  placeholder="Write your comment..."
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                />
+                        <button
+                          className="text-red-600 hover:underline"
+                          onClick={() => handleDelete(c.idComentario)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                </li>
+              ))}
+            </ul>
 
-                <div className="flex justify-end gap-2">
-                  <button
-                    className="px-4 py-2 rounded-xl text-sm text-text-secondary hover:bg-surface"
-                    onClick={closeCommentPopup}
-                  >
-                    Cancel
-                  </button>
+            <button
+              className="bg-primary text-white px-4 py-2 rounded-xl"
+              onClick={() => setIsCommentPopupOpen(true)}
+            >
+              Add comment
+            </button>
+          </section>
+        </div>
 
-                  <button
-                    className="px-5 py-2 rounded-xl text-sm font-medium bg-primary text-white hover:bg-primary/90 disabled:opacity-60"
-                    onClick={handleSaveComment}
-                    disabled={!commentText.trim()}
-                  >
-                    Post comment
-                  </button>
-                </div>
+        {/* POPUP NUEVO COMENTARIO */}
+        {isCommentPopupOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[9999]">
+            <div className="bg-white rounded-xl p-6 w-full max-w-md border space-y-4">
+
+              <h3 className="font-semibold text-lg">New Comment</h3>
+
+              <textarea
+                rows={4}
+                className="w-full border rounded-xl p-2"
+                placeholder="Write something..."
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+              />
+
+              <div className="flex justify-end gap-3">
+                <button
+                  className="px-4 py-2 bg-gray-200 rounded-xl"
+                  onClick={() => setIsCommentPopupOpen(false)}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="px-4 py-2 bg-primary text-white rounded-xl"
+                  onClick={handleSaveComment}
+                >
+                  Post
+                </button>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-        </div>
+        {/* CONFIRM DIALOG */}
+        <ConfirmDialog
+          open={confirmData.open}
+          title={confirmData.title}
+          message={confirmData.message}
+          onCancel={() =>
+            setConfirmData((prev) => ({ ...prev, open: false }))
+          }
+          onConfirm={() => {
+            confirmData.onConfirm();
+            setConfirmData((prev) => ({ ...prev, open: false }));
+          }}
+        />
       </div>
     </div>
   );
 }
-
-export default RecipeDetailModal;

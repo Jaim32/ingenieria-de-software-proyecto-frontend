@@ -15,6 +15,9 @@ const CommunityForum = () => {
   const [showPostDetailModal, setShowPostDetailModal] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [filter, setFilter] = useState("Popular");
+  const [filterType, setFilterType] = useState("all");
+  const [search, setSearch] = useState("");
+
 
   const [newPost, setNewPost] = useState({
     title: "",
@@ -23,6 +26,7 @@ const CommunityForum = () => {
     image: null,
     imagePreview: null,
   });
+  
 
   const token = localStorage.getItem("token");
 
@@ -71,12 +75,15 @@ const CommunityForum = () => {
       );
 
       // Normalizar posts
+      
       const normalized = postsWithComments.map((p) => ({
         idPost: p.idPost,
         title: p.title,
         description: p.content || p.description,
         category: p.type || "General",
-        image: p.image || "https://images.unsplash.com/photo-1557683316-973673baf926?w=800",
+  image: p.image
+    ? `http://localhost:4029${p.image}`
+    : "https://images.unsplash.com/photo-1557683316-973673baf926?w=800",
         likes: p.likes ?? 0,
         comments: p.comments,
         userId: p.userId,
@@ -114,8 +121,10 @@ const CommunityForum = () => {
         {
           title: postData.title,
           content: postData.description,
-          type: "general",
+          type: postData.category,
           userId,
+          image: postData.imagePath ?? null   // ← AQUI MANDAMOS LA IMAGEN
+
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -198,6 +207,19 @@ const CommunityForum = () => {
     }
   };
 
+  const filteredPosts = posts.filter((p) => {
+  const matchType =
+    filterType === "all" ||
+    p.category?.toLowerCase() === filterType.toLowerCase();
+
+  const matchText =
+    p.title.toLowerCase().includes(search.toLowerCase()) ||
+    p.description.toLowerCase().includes(search.toLowerCase());
+
+  return matchType && matchText;
+});
+
+
   return (
     <>
       <Helmet>
@@ -209,15 +231,18 @@ const CommunityForum = () => {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <ForumFilterBar
-            filter={filter}
-            setFilter={setFilter}
-            onNewPost={() => setShowNewPostModal(true)}
-          />
+  filterType={filterType}
+  setFilterType={setFilterType}
+  search={search}
+  setSearch={setSearch}
+  onNewPost={() => setShowNewPostModal(true)}
+/>
+
 
           {loading ? (
             <p className="text-center text-gray-500">Loading posts...</p>
           ) : (
-            <PostsGrid posts={posts} onOpenPost={handleOpenPost} />
+<PostsGrid posts={filteredPosts} onOpenPost={handleOpenPost} />
           )}
         </div>
 
