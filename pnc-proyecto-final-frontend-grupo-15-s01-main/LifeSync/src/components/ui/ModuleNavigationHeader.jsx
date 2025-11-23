@@ -56,7 +56,7 @@ export default function ModuleNavigationHeader() {
     },
   ];
 
-  /* ─── Módulo para usuarios ADMIN y PREMIUM ──────────────────── */
+  /* ─── Módulo Forum (visible para todos los roles) ───────────── */
   const consultsModule = {
     id: "consults",
     label: "Forum",
@@ -67,7 +67,7 @@ export default function ModuleNavigationHeader() {
     activeText: "text-green-600",
   };
 
-  /* ─── Módulos extra según rol ──────────────────────────────── */
+  /* ─── Recipe Moderation (CATADOR y ADMIN) ───────────────────── */
   const recipeModeration = {
     id: "recipe-moderation",
     label: "Recipe Moderation",
@@ -78,6 +78,7 @@ export default function ModuleNavigationHeader() {
     activeText: "text-yellow-600",
   };
 
+  /* ─── Admin Dashboard (solo ADMIN) ─────────────────────────── */
   const adminDashboard = {
     id: "admin-dashboard",
     label: "Admin Dashboard",
@@ -88,16 +89,25 @@ export default function ModuleNavigationHeader() {
     activeText: "text-red-600",
   };
 
-  /* ─── Construye el arreglo final de módulos ─────────────────── */
+  /* ─── Construcción del menú final ──────────────────────────── */
   const modules = [
     ...baseModules,
-    ...(["ADMIN", "PREMIUM"].includes(roleUpper) ? [consultsModule] : []),
-    ...(roleUpper === "CATADOR" ? [recipeModeration] : []),
+
+    // Forum visible para todos los usuarios
+    consultsModule,
+
+    // Recipe Moderation visible para CATADOR y ADMIN
+    ...(roleUpper === "CATADOR" || roleUpper === "ADMIN"
+      ? [recipeModeration]
+      : []),
+
+    // Admin dashboard solo para ADMIN
     ...(roleUpper === "ADMIN" ? [adminDashboard] : []),
   ];
 
-  /* ─── Funciones auxiliares ──────────────────────────────────── */
+  /* ─── Funciones auxiliares ─────────────────────────────────── */
   const isActive = (m) => location.pathname.startsWith(m.route);
+
   const goTo = (m) => {
     navigate(m.route);
     setMobileOpen(false);
@@ -112,6 +122,7 @@ export default function ModuleNavigationHeader() {
   const hdrBase = "fixed top-0 left-0 right-0 border-b z-50";
   const hdrDay = "bg-white border-gray-200";
   const hdrNight = "theme-sleep bg-background border-border";
+
   const inactiveBtn = isSleepMode
     ? "text-secondary hover:text-primary hover:bg-white/5"
     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50";
@@ -124,19 +135,13 @@ export default function ModuleNavigationHeader() {
           <div className="flex items-center justify-between h-20">
             {/* Logo + Navegación */}
             <div className="flex items-center space-x-4">
-              {/* Logo */}
               <div className="flex items-center space-x-3">
                 <div className="w-20 h-20 flex items-center justify-center">
-                  <img
-                    src={logoSrc}
-                    alt="Logo"
-                    className="h-full object-contain"
-                  />
+                  <img src={logoSrc} alt="Logo" className="h-full object-contain" />
                 </div>
-                <span className="text-xl font-bold text-gray-900">
-                  LifeSync
-                </span>
+                <span className="text-xl font-bold text-gray-900">LifeSync</span>
               </div>
+
               {/* Navegación desktop */}
               <nav className="hidden md:flex items-center space-x-4">
                 {modules.map((m) => (
@@ -166,14 +171,10 @@ export default function ModuleNavigationHeader() {
                   onClick={() => setAccountOpen((v) => !v)}
                   className="p-2 rounded-full hover:bg-gray-100 transition"
                 >
-                  <Icon
-                    name="User"
-                    size={20}
-                    className={isSleepMode ? "text-secondary" : ""}
-                  />
+                  <Icon name="User" size={20} className={isSleepMode ? "text-secondary" : ""} />
                 </button>
                 {isAccountOpen && (
-                  <div className="absolute top-full right-0 mt-2 w-48 bg-white shadow-lg rounded-md border border-gray-200">
+                  <div className="absolute top-full right-0 mt-2 w-48 bg-white shadow-lg rounded-md border">
                     <button
                       onClick={() => {
                         setProfileOpen(true);
@@ -184,10 +185,7 @@ export default function ModuleNavigationHeader() {
                       Profile Settings
                     </button>
                     <button
-                      onClick={() => {
-                        handleLogout();
-                        setAccountOpen(false);
-                      }}
+                      onClick={handleLogout}
                       className="w-full text-left px-4 py-2 hover:bg-gray-50"
                     >
                       Sign Out
@@ -195,6 +193,7 @@ export default function ModuleNavigationHeader() {
                   </div>
                 )}
               </div>
+
               <button
                 className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition"
                 onClick={() => {
@@ -202,11 +201,7 @@ export default function ModuleNavigationHeader() {
                   setAccountOpen(false);
                 }}
               >
-                <Icon
-                  name={isMobileOpen ? "X" : "Menu"}
-                  size={20}
-                  className={isSleepMode ? "text-secondary" : ""}
-                />
+                <Icon name={isMobileOpen ? "X" : "Menu"} size={20} className={isSleepMode ? "text-secondary" : ""} />
               </button>
             </div>
           </div>
@@ -215,7 +210,9 @@ export default function ModuleNavigationHeader() {
         {/* Navegación móvil */}
         {isMobileOpen && (
           <div
-            className={`md:hidden ${isSleepMode ? "theme-sleep bg-background border-t border-border" : "bg-white border-t border-gray-200"}`}
+            className={`md:hidden ${
+              isSleepMode ? "theme-sleep bg-background border-t border-border" : "bg-white border-t border-gray-200"
+            }`}
           >
             <nav className="px-4 py-4 space-y-2">
               {modules.map((m) => (
@@ -237,17 +234,11 @@ export default function ModuleNavigationHeader() {
       </header>
 
       {/* Slide-over de perfil */}
-      <ProfileSlide
-        isOpen={isProfileOpen}
-        onClose={() => setProfileOpen(false)}
-      />
+      <ProfileSlide isOpen={isProfileOpen} onClose={() => setProfileOpen(false)} />
 
       {/* Contenido */}
       {isSleepMode ? (
-        <div
-          className="pt-20 theme-sleep bg-background"
-          style={{ minHeight: "calc(100vh - 5rem)" }}
-        >
+        <div className="pt-20 theme-sleep bg-background" style={{ minHeight: "calc(100vh - 5rem)" }}>
           <Outlet />
         </div>
       ) : (

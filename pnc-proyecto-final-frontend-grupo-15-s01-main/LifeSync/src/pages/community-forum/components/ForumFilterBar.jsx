@@ -1,42 +1,39 @@
-import React from 'react';
-import { Plus } from 'lucide-react';
+import React from "react";
+import { Plus } from "lucide-react";
 
-export default function ForumFilterBar({ filter, setFilter, onNewPost }) {
+export default function ForumFilterBar({ filterType, setFilterType, search, setSearch, onNewPost }) {
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-      <h2 className="text-2xl font-bold text-gray-900">Posts</h2>
-      
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          onClick={() => setFilter('Popular')}
-          className={`px-5 py-2 rounded-lg font-semibold text-sm transition-all duration-200 ${
-            filter === 'Popular'
-              ? 'bg-orange-500 text-white border-2 border-orange-500'
-              : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-          }`}
-        >
-          Popular
-        </button>
-        
-        <button
-          onClick={() => setFilter('Newest')}
-          className={`px-5 py-2 rounded-lg font-semibold text-sm transition-all duration-200 ${
-            filter === 'Newest'
-              ? 'bg-orange-500 text-white border-2 border-orange-500'
-              : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-          }`}
-        >
-          Newest
-        </button>
-        
-        <button
-          onClick={onNewPost}
-          className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
-        >
-          <Plus size={20} />
-          New Post
-        </button>
-      </div>
+    <div className="flex items-center justify-between mb-6">
+      {/* Filtro por tipo */}
+      <select
+        value={filterType}
+        onChange={(e) => setFilterType(e.target.value)}
+        className="px-4 py-2 border rounded-lg bg-white shadow-sm"
+      >
+        <option value="all">All Types</option>
+        <option value="Food">Food</option>
+        <option value="Sleep">Sleep</option>
+        <option value="Training">Training</option>
+        <option value="Hydration">Hydration</option>
+      </select>
+
+      {/* Buscador */}
+      <input
+        type="text"
+        placeholder="Search posts..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="px-4 py-2 border rounded-lg w-64 shadow-sm"
+      />
+
+      {/* Botón nuevo post */}
+      <button
+        onClick={onNewPost}
+        className="flex items-center gap-2 px-4 py-2 rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg"
+      >
+        <Plus size={18} />
+        New Post
+      </button>
     </div>
   );
 }
