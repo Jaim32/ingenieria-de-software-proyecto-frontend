@@ -17,11 +17,12 @@ export default function NewPostModal({ newPost, setNewPost, onClose, onCreate })
     }
   };
 
-  const handleSubmit = () => {
-    if (newPost.title && newPost.description) {
-      onCreate(newPost);
-    }
-  };
+  const handleSubmit = async () => {
+  if (newPost.title && newPost.description) {
+    // 🔹 Espera la promesa para que luego el padre cierre y refresque
+    await onCreate(newPost);
+  }
+};
 
   return (
     <div
