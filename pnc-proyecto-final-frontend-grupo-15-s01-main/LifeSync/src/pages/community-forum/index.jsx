@@ -27,103 +27,21 @@ const CommunityForum = () => {
   const token = localStorage.getItem("token");
 
   /* ===========================================================
-     Función para enriquecer comentarios con usuario
-  ============================================================== */
- const enrichCommentsWithUsers = async (comments) => {
-  const token = localStorage.getItem("token");
-
-  const userIds = [...new Set(comments.map(c => c.idUser).filter(Boolean))];
-  const userMap = {};
-
- await Promise.all(userIds.map(async (id) => {
-  try {
-    const res = await axios.get(
-      `http://localhost:8082/api/usuarios/getById?idUsuario=${id}`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    console.log('Usuario API response:', res.data); // <--- aquí
-    const user = res.data?.data || res.data || {};
-    userMap[id] = {
-      nombre: user.nombre || "Usuario",
-      avatar: user.avatar || (user.nombre ? user.nombre[0].toUpperCase() : "U"),
-    };
-  } catch {
-    userMap[id] = { nombre: "Usuario", avatar: "U" };
-  }
-}));
-
-
-
-  const enriched = comments.map(c => ({
-    ...c,
-    author: userMap[c.idUser]?.nombre || "Usuario",
-    avatar: userMap[c.idUser]?.avatar || "U",
-  }));
-
-  console.log("Enriched comments:", enriched); // ✅ Aquí puedes ver los nombres
-  return enriched;
-};
-
-
-
-
-  /* ===========================================================
-     Función para enriquecer posts con usuario y comentarios
-  ============================================================== */
-  const enrichPostsWithAuthor = async (posts) => {
-    const normalized = posts.map((p) => ({
-      idPost: p.idPost || p.id,
-      title: p.title || "",
-      description: p.content || p.description || "",
-      category: p.category || p.type || "General",
-      image: p.image || p.imageUrl || "https://images.unsplash.com/photo-1557683316-973673baf926?w=800",
-      likes: typeof p.likes === "number" ? p.likes : 0,
-      comments: Array.isArray(p.comments) ? p.comments : [],
-      userId: p.userId,
-      author: "Desconocido",
-      avatar: "U",
-      _raw: p,
-    }));
-
-    const userIds = [...new Set(normalized.map((p) => p.userId).filter(Boolean))];
-    const userMap = {};
-
-    await Promise.all(
-      userIds.map(async (id) => {
-        try {
-          const res = await axios.get(`http://localhost:8082/api/usuarios/getById?idUsuario=${id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          const u = res.data?.data || res.data || {};
-          userMap[id] = { nombre: u.nombre || "Desconocido", avatar: u.avatar || "U" };
-        } catch {
-          userMap[id] = { nombre: "Desconocido", avatar: "U" };
-        }
-      })
-    );
-
-    return normalized.map((p) => ({
-  ...p,
-  author: userMap[p.userId]?.nombre || "Desconocido",
-  avatar: userMap[p.userId]?.avatar || "U", // <-- usar userId, no idUser
-}));
-
-  };
-  
-
-  /* ===========================================================
-     Fetch posts desde backend
+     Cargar posts + comentarios
   ============================================================== */
   const fetchPosts = async () => {
     if (!token) return console.error("Token missing");
+
     try {
       setLoading(true);
+
       const res = await axios.get("http://localhost:8082/api/posts", {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       let postsData = Array.isArray(res.data) ? res.data : [];
 
-      // Traer comentarios para cada post
+      // Obtener comentarios por post
       const postsWithComments = await Promise.all(
         postsData.map(async (p) => {
           try {
@@ -132,15 +50,18 @@ const CommunityForum = () => {
               { headers: { Authorization: `Bearer ${token}` } }
             );
 
+            // Normalizar comentarios e incluir nombreUsuario
             let comments = commentsRes.data.map((c) => ({
-              id: c.idComentario || c.id,
+              id: c.idComentario,
               text: c.contenido,
               timestamp: c.fecha || "",
               userId: c.idUser,
+              author: c.nombreUsuario || "Usuario",
+              avatar: c.nombreUsuario
+                ? c.nombreUsuario[0].toUpperCase()
+                : "U",
               _raw: c,
             }));
-
-            comments = await enrichCommentsWithUsers(comments);
 
             return { ...p, comments };
           } catch {
@@ -149,8 +70,24 @@ const CommunityForum = () => {
         })
       );
 
-      const adapted = await enrichPostsWithAuthor(postsWithComments);
-      setPosts(adapted);
+      // Normalizar posts
+      const normalized = postsWithComments.map((p) => ({
+        idPost: p.idPost,
+        title: p.title,
+        description: p.content || p.description,
+        category: p.type || "General",
+        image: p.image || "https://images.unsplash.com/photo-1557683316-973673baf926?w=800",
+        likes: p.likes ?? 0,
+        comments: p.comments,
+        userId: p.userId,
+        author: p.nombreUsuario || "Desconocido",
+        avatar: p.nombreUsuario
+          ? p.nombreUsuario[0].toUpperCase()
+          : "U",
+        _raw: p,
+      }));
+
+      setPosts(normalized);
     } catch (err) {
       console.error("Error cargando posts:", err);
       setPosts([]);
@@ -168,8 +105,10 @@ const CommunityForum = () => {
   ============================================================== */
   const handleCreatePost = async (postData) => {
     if (!token) return;
+
     try {
       const userId = localStorage.getItem("userId");
+
       await axios.post(
         "http://localhost:8082/api/posts",
         {
@@ -180,6 +119,7 @@ const CommunityForum = () => {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
       await fetchPosts();
       setShowNewPostModal(false);
       setNewPost({ title: "", description: "", category: "Food", image: null, imagePreview: null });
@@ -192,48 +132,51 @@ const CommunityForum = () => {
      Agregar comentario
   ============================================================== */
   const handleAddComment = async (commentText, postId) => {
-  if (!token || !commentText.trim()) return;
-  try {
-    const res = await axios.post(
-      `http://localhost:8082/api/posts/${postId}/comentarios`,
-      { contenido: commentText },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    if (!token || !commentText.trim()) return;
 
-    const c = res.data;
+    try {
+      const res = await axios.post(
+        `http://localhost:8082/api/posts/${postId}/comentarios`,
+        { contenido: commentText },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-    // Normalizar comentario
-    let newComment = {
-      id: c.idComentario,
-      text: c.contenido,
-      timestamp: c.fecha || "Just now",
-      userId: c.idUser,
-      _raw: c
-    };
+      const c = res.data;
 
-    // Enriquecer con autor y avatar
-    [newComment] = await enrichCommentsWithUsers([newComment]);
+      let newComment = {
+        id: c.idComentario,
+        text: c.contenido,
+        timestamp: c.fecha || "Just now",
+        userId: c.idUser,
+        author: c.nombreUsuario,
+        avatar: c.nombreUsuario
+          ? c.nombreUsuario[0].toUpperCase()
+          : "U",
+        _raw: c,
+      };
 
-    // Actualizar posts
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.idPost === postId ? { ...p, comments: [...p.comments, newComment] } : p
-      )
-    );
+      // Actualizar posts
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.idPost === postId
+            ? { ...p, comments: [...p.comments, newComment] }
+            : p
+        )
+      );
 
-    // Actualizar post seleccionado
-    if (selectedPost?.idPost === postId) {
-      setSelectedPost((prev) => ({
-        ...prev,
-        comments: [...prev.comments, newComment],
-      }));
+      // Actualizar modal abierto
+      if (selectedPost?.idPost === postId) {
+        setSelectedPost((prev) => ({
+          ...prev,
+          comments: [...prev.comments, newComment],
+        }));
+      }
+
+      return newComment;
+    } catch (err) {
+      console.error("Error agregando comentario:", err.response?.data || err);
     }
-
-    return newComment;
-  } catch (err) {
-    console.error("Error agregando comentario:", err.response?.data || err);
-  }
-};
+  };
 
   const handleOpenPost = (post) => {
     setSelectedPost(post);
@@ -246,8 +189,12 @@ const CommunityForum = () => {
         p.idPost === postId ? { ...p, likes: p.likes + 1 } : p
       )
     );
+
     if (selectedPost?.idPost === postId) {
-      setSelectedPost({ ...selectedPost, likes: selectedPost.likes + 1 });
+      setSelectedPost({
+        ...selectedPost,
+        likes: selectedPost.likes + 1,
+      });
     }
   };
 
