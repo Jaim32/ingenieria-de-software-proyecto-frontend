@@ -1,120 +1,131 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate, Outlet } from 'react-router-dom';
-import Icon from '../AppIcon';
-import ProfileSlide from './ProfileSlide';
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate, Outlet } from "react-router-dom";
+import Icon from "../AppIcon";
+import ProfileSlide from "./ProfileSlide";
 
 export default function ModuleNavigationHeader() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [role, setRole] = useState('USER');
+  const [role, setRole] = useState("USER");
   const [isAccountOpen, setAccountOpen] = useState(false);
   const [isMobileOpen, setMobileOpen] = useState(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem('user');
+    const stored = localStorage.getItem("user");
     if (!stored) return;
     const { rol } = JSON.parse(stored);
-    setRole(rol || 'USER');
+    setRole(rol || "USER");
   }, []);
 
   const roleUpper = role.toUpperCase();
-  const isSleepMode = location.pathname.startsWith('/sleep-cycle');
-  const logoSrc = isSleepMode ? '/images/oscuro.svg' : '/images/Logo.svg';
+  const isSleepMode = location.pathname.startsWith("/sleep-cycle");
+  const logoSrc = isSleepMode ? "/images/oscuro.svg" : "/images/Logo.svg";
 
   /* ─── Módulos base (visibles para todos) ────────────────────── */
   const baseModules = [
     {
-      id: 'food-control',
-      label: 'Food Control',
-      icon: 'Utensils',
-      route: '/daily-nutrition-overview-dashboard',
-      activeBg: 'bg-orange-50',
-      activeBorder: 'border-l-4 border-orange-500',
-      activeText: 'text-orange-600',
+      id: "food-control",
+      label: "Food Control",
+      icon: "Utensils",
+      route: "/daily-nutrition-overview-dashboard",
+      activeBg: "bg-orange-50",
+      activeBorder: "border-l-4 border-orange-500",
+      activeText: "text-orange-600",
     },
     {
-      id: 'ideal-sleep',
-      label: 'Ideal Sleep',
-      icon: 'Moon',
-      route: '/sleep-cycle',
-      activeBg: isSleepMode ? 'bg-primary/10' : 'bg-purple-50',
+      id: "ideal-sleep",
+      label: "Ideal Sleep",
+      icon: "Moon",
+      route: "/sleep-cycle",
+      activeBg: isSleepMode ? "bg-primary/10" : "bg-purple-50",
       activeBorder: isSleepMode
-        ? 'border-l-4 border-primary-500'
-        : 'border-l-4 border-purple-600',
-      activeText: isSleepMode ? 'text-primary-600' : 'text-purple-800',
+        ? "border-l-4 border-primary-500"
+        : "border-l-4 border-purple-600",
+      activeText: isSleepMode ? "text-primary-600" : "text-purple-800",
     },
     {
-      id: 'hydro-track',
-      label: 'HydroTrack',
-      icon: 'Droplets',
-      route: '/hydration-tracking-dashboard',
-      activeBg: 'bg-blue-50',
-      activeBorder: 'border-l-4 border-blue-500',
-      activeText: 'text-blue-600',
+      id: "hydro-track",
+      label: "HydroTrack",
+      icon: "Droplets",
+      route: "/hydration-tracking-dashboard",
+      activeBg: "bg-blue-50",
+      activeBorder: "border-l-4 border-blue-500",
+      activeText: "text-blue-600",
     },
   ];
 
-  /* ─── Módulo para usuarios ADMIN y PREMIUM ──────────────────── */
+  /* ─── Módulo Forum (visible para todos los roles) ───────────── */
   const consultsModule = {
-    id: 'consults',
-    label: 'Consults',
-    icon: 'MessageCircle',
-    route: '/ai-wellness-chat',
-    activeBg: 'bg-green-50',
-    activeBorder: 'border-l-4 border-green-500',
-    activeText: 'text-green-600',
+    id: "consults",
+    label: "Forum",
+    icon: "MessageCircle",
+    route: "/community-forum",
+    activeBg: "bg-green-50",
+    activeBorder: "border-l-4 border-green-500",
+    activeText: "text-green-600",
   };
 
-  /* ─── Módulos extra según rol ──────────────────────────────── */
+  /* ─── Recipe Moderation (CATADOR y ADMIN) ───────────────────── */
   const recipeModeration = {
-    id: 'recipe-moderation',
-    label: 'Recipe Moderation',
-    icon: 'Settings',
-    route: '/recipe-moderation-dashboard',
-    activeBg: 'bg-yellow-50',
-    activeBorder: 'border-l-4 border-yellow-500',
-    activeText: 'text-yellow-600',
+    id: "recipe-moderation",
+    label: "Recipe Moderation",
+    icon: "Settings",
+    route: "/recipe-moderation-dashboard",
+    activeBg: "bg-yellow-50",
+    activeBorder: "border-l-4 border-yellow-500",
+    activeText: "text-yellow-600",
   };
 
+  /* ─── Admin Dashboard (solo ADMIN) ─────────────────────────── */
   const adminDashboard = {
-    id: 'admin-dashboard',
-    label: 'Admin Dashboard',
-    icon: 'Settings',
-    route: '/administrative-dashboard',
-    activeBg: 'bg-red-50',
-    activeBorder: 'border-l-4 border-red-500',
-    activeText: 'text-red-600',
+    id: "admin-dashboard",
+    label: "Admin Dashboard",
+    icon: "Settings",
+    route: "/administrative-dashboard",
+    activeBg: "bg-red-50",
+    activeBorder: "border-l-4 border-red-500",
+    activeText: "text-red-600",
   };
 
-  /* ─── Construye el arreglo final de módulos ─────────────────── */
+  /* ─── Construcción del menú final ──────────────────────────── */
   const modules = [
     ...baseModules,
-    ...(['ADMIN', 'PREMIUM'].includes(roleUpper) ? [consultsModule] : []),
-    ...(roleUpper === 'CATADOR' ? [recipeModeration] : []),
-    ...(roleUpper === 'ADMIN' ? [adminDashboard] : []),
+
+    // Forum visible para todos los usuarios
+    consultsModule,
+
+    // Recipe Moderation visible para CATADOR y ADMIN
+    ...(roleUpper === "CATADOR" || roleUpper === "ADMIN"
+      ? [recipeModeration]
+      : []),
+
+    // Admin dashboard solo para ADMIN
+    ...(roleUpper === "ADMIN" ? [adminDashboard] : []),
   ];
 
-  /* ─── Funciones auxiliares ──────────────────────────────────── */
-  const isActive = m => location.pathname.startsWith(m.route);
-  const goTo = m => {
+  /* ─── Funciones auxiliares ─────────────────────────────────── */
+  const isActive = (m) => location.pathname.startsWith(m.route);
+
+  const goTo = (m) => {
     navigate(m.route);
     setMobileOpen(false);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/authentication-flow-interface?tab=login', { replace: true });
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/authentication-flow-interface?tab=login", { replace: true });
   };
 
-  const hdrBase = 'fixed top-0 left-0 right-0 border-b z-50';
-  const hdrDay = 'bg-white border-gray-200';
-  const hdrNight = 'theme-sleep bg-background border-border';
+  const hdrBase = "fixed top-0 left-0 right-0 border-b z-50";
+  const hdrDay = "bg-white border-gray-200";
+  const hdrNight = "theme-sleep bg-background border-border";
+
   const inactiveBtn = isSleepMode
-    ? 'text-secondary hover:text-primary hover:bg-white/5'
-    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50';
+    ? "text-secondary hover:text-primary hover:bg-white/5"
+    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50";
 
   /* ─── Render ────────────────────────────────────────────────── */
   return (
@@ -124,24 +135,26 @@ export default function ModuleNavigationHeader() {
           <div className="flex items-center justify-between h-20">
             {/* Logo + Navegación */}
             <div className="flex items-center space-x-4">
-              {/* Logo */}
               <div className="flex items-center space-x-3">
                 <div className="w-20 h-20 flex items-center justify-center">
                   <img src={logoSrc} alt="Logo" className="h-full object-contain" />
                 </div>
                 <span className="text-xl font-bold text-gray-900">LifeSync</span>
               </div>
+
               {/* Navegación desktop */}
               <nav className="hidden md:flex items-center space-x-4">
-                {modules.map(m => (
+                {modules.map((m) => (
                   <button
                     key={m.id}
                     onClick={() => goTo(m)}
                     className={`
                       flex items-center px-4 py-2 rounded-lg font-medium transition
-                      ${isActive(m)
-                        ? `${m.activeBg} ${m.activeBorder} ${m.activeText} shadow-sm`
-                        : inactiveBtn}
+                      ${
+                        isActive(m)
+                          ? `${m.activeBg} ${m.activeBorder} ${m.activeText} shadow-sm`
+                          : inactiveBtn
+                      }
                     `}
                   >
                     <Icon name={m.icon} size={18} className="mr-2" />
@@ -155,21 +168,24 @@ export default function ModuleNavigationHeader() {
             <div className="flex items-center space-x-3">
               <div className="relative">
                 <button
-                  onClick={() => setAccountOpen(v => !v)}
+                  onClick={() => setAccountOpen((v) => !v)}
                   className="p-2 rounded-full hover:bg-gray-100 transition"
                 >
-                  <Icon name="User" size={20} className={isSleepMode ? 'text-secondary' : ''} />
+                  <Icon name="User" size={20} className={isSleepMode ? "text-secondary" : ""} />
                 </button>
                 {isAccountOpen && (
-                  <div className="absolute top-full right-0 mt-2 w-48 bg-white shadow-lg rounded-md border border-gray-200">
+                  <div className="absolute top-full right-0 mt-2 w-48 bg-white shadow-lg rounded-md border">
                     <button
-                      onClick={() => { setProfileOpen(true); setAccountOpen(false); }}
+                      onClick={() => {
+                        setProfileOpen(true);
+                        setAccountOpen(false);
+                      }}
                       className="w-full text-left px-4 py-2 hover:bg-gray-50"
                     >
                       Profile Settings
                     </button>
                     <button
-                      onClick={() => { handleLogout(); setAccountOpen(false); }}
+                      onClick={handleLogout}
                       className="w-full text-left px-4 py-2 hover:bg-gray-50"
                     >
                       Sign Out
@@ -177,15 +193,15 @@ export default function ModuleNavigationHeader() {
                   </div>
                 )}
               </div>
+
               <button
                 className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition"
-                onClick={() => { setMobileOpen(v => !v); setAccountOpen(false); }}
+                onClick={() => {
+                  setMobileOpen((v) => !v);
+                  setAccountOpen(false);
+                }}
               >
-                <Icon
-                  name={isMobileOpen ? 'X' : 'Menu'}
-                  size={20}
-                  className={isSleepMode ? 'text-secondary' : ''}
-                />
+                <Icon name={isMobileOpen ? "X" : "Menu"} size={20} className={isSleepMode ? "text-secondary" : ""} />
               </button>
             </div>
           </div>
@@ -193,9 +209,13 @@ export default function ModuleNavigationHeader() {
 
         {/* Navegación móvil */}
         {isMobileOpen && (
-          <div className={`md:hidden ${isSleepMode ? 'theme-sleep bg-background border-t border-border' : 'bg-white border-t border-gray-200'}`}>
+          <div
+            className={`md:hidden ${
+              isSleepMode ? "theme-sleep bg-background border-t border-border" : "bg-white border-t border-gray-200"
+            }`}
+          >
             <nav className="px-4 py-4 space-y-2">
-              {modules.map(m => (
+              {modules.map((m) => (
                 <button
                   key={m.id}
                   onClick={() => goTo(m)}
@@ -218,7 +238,7 @@ export default function ModuleNavigationHeader() {
 
       {/* Contenido */}
       {isSleepMode ? (
-        <div className="pt-20 theme-sleep bg-background" style={{ minHeight: 'calc(100vh - 5rem)' }}>
+        <div className="pt-20 theme-sleep bg-background" style={{ minHeight: "calc(100vh - 5rem)" }}>
           <Outlet />
         </div>
       ) : (
